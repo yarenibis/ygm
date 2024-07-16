@@ -1,6 +1,8 @@
 pipeline {
     agent any
-    
+    tools {
+        git 'default git'
+    }
 
     environment {
         DOCKER_COMPOSE_VERSION = '1.29.2'
