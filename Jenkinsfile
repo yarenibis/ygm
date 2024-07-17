@@ -1,8 +1,6 @@
 pipeline {
     agent any
-    tools {
-        git 'default git'
-    }
+
 
     environment {
         DOCKER_COMPOSE_VERSION = '1.29.2'
@@ -13,8 +11,10 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // GitHub'dan kodu çek
-                git branch: 'main', url: 'https://github.com/yarenibis/ygm.git'
+               checkout scmGit(
+                    branches: [[name: '*/main']],
+                    userRemoteConfigs: [[url: 'https://github.com/yarenibis/ygm']]
+                )
             }
         }
 
