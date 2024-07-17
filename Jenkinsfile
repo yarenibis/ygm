@@ -1,39 +1,37 @@
 pipeline {
     agent any
 
-
-    environment {
-        DOCKER_COMPOSE_VERSION = '1.29.2'
-        COMPOSE_FILE = 'docker-compose.yml' // Docker Compose dosya adı
-        PROJECT_NAME = 'myproject' // Docker Compose proje adı
-    }
-
     stages {
         stage('Checkout') {
             steps {
-               checkout scmGit(
-                    branches: [[name: '*/main']],
-                    userRemoteConfigs: [[url: 'https://github.com/yarenibis/ygm']]
-                )
+                // Kaynak kodunun versiyon kontrol sisteminden çekilmesi
+                git 'https://github.com/yarenibis/ygm.git'
             }
         }
 
-        
-    
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
+                // Docker imajının inşa edilmesi
                 script {
-                    // Docker imajını oluştur
-                    docker.build('myjavaapp')
+                    sh 'docker build -t ymsfinal .'
                 }
             }
         }
-        
-        stage('Deploy') {
+
+        stage('Run Docker Container') {
             steps {
-                // Docker imajını başlatarak container'ı çalıştır
+                // Docker konteynerinin çalıştırılması
                 script {
-                    docker.run('-d -p 8080:8080 --name myjavaapp-container myjavaapp')
+                    sh 'docker run -p 8090:8080 -p 4849:4848 -d ymsfinal'
+                }
+            }
+        }
+
+        stage('Run Docker Compose') {
+            steps {
+                // Docker Compose kullanarak konteynerlerin çalıştırılması
+                script {
+                    sh 'docker-compose up -d'
                 }
             }
         }
@@ -41,10 +39,12 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline başarıyla tamamlandı. Uygulama başarıyla dağıtıldı.'
+            // Başarılı bir pipeline çalışmasından sonra yapılacak işlemler
+            echo 'Pipeline completed successfully!'
         }
         failure {
-            echo 'Pipeline başarısız oldu. Hata kontrol edilmeli.'
+            // Başarısız bir pipeline çalışmasından sonra yapılacak işlemler
+            echo 'Pipeline failed!'
         }
     }
 }
